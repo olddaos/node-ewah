@@ -1,10 +1,10 @@
-//     node-ewah/ewah.js
-//
-//     Copyright (c) 2012 Alexey Kosenkov
-//     Dual licensed under the MIT and GPL licenses.
-//     Documentation and details at https://github.com/olddaos/node-ewah
-(function() {
-  var _global = this;
+#! /usr/bin/env node
 
-  var BV  = require('./node-ewah');
-}());
+var addon = require('./build/Release/node-ewah');
+
+var bv    = new addon.BitVector();
+
+bv.append( 10 );
+bv.append( 678 );
+bv.append( 2678 );
+

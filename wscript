@@ -2,7 +2,7 @@ import Options
 from os import unlink, symlink, popen
 from os.path import exists 
 
-srcdir = "./src"
+srcdir = "."
 blddir = "build"
 VERSION = "0.0.1"
 
@@ -16,7 +16,7 @@ def configure(conf):
 def build(bld):
   obj = bld.new_task_gen("cxx", "shlib", "node_addon")
   obj.target = "node-ewah"
-  obj.source = "EWAHAddon.cc"
+  obj.source = [ "EWAHAddon.cc", "BitVector.cc" ]
 
 def shutdown():
   if Options.commands['clean']:

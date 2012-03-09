@@ -9,8 +9,17 @@ using namespace v8;
 using namespace node;
 
 /// Traditional module init function
-void InitAll( v8::Handle< v8::Object> target) {
+void InitAll( Handle< Object> target) {
   BitVector::Init(target);
 }
 
-NODE_MODULE(node-ewah, init)
+extern "C" void
+init(Handle<Object> target)
+{
+    HandleScope scope;
+
+    BitVector::Init(target);
+}
+
+
+//NODE_MODULE(node-ewah, InitAll)
