@@ -37,19 +37,19 @@ var vGoods    = new BitVector();
 var vSpecies  = new BitVector();
 
 // This is the bitvector of docids, that contain the word "goods". Bit number #xxx is on, if and only if document number #xxx contains word "goods".
-vGoods.append(10);
-vGoods.append(1234);
-vGoods.append(101234);
+vGoods.push(10);
+vGoods.push(1234);
+vGoods.push(101234);
 
 // This is the bitvector of docids, that contain the word "species". Bit is the for the same reason.
-vSpecies.append(1234);
-vSpecies.append(1239);
-vSpecies.append(10000);
+vSpecies.push(1234);
+vSpecies.push(1239);
+vSpecies.push(10000);
 
-// Now lets know, what documents contains both terms at the same time
+// Now lets know, what documents contains first or second term
 // This operation is performed using native machine words, that contain bitmap fragments, and so is extremely fast
-// In addition, sparse_and c
-vMergedVector = vGoods.sparse_and( vSpecies );
+
+var vMergedVector = vGoods.rawor( vSpecies );
 
 // Check, that things are retrieved fine...
 var checkVector = vGoods.map( function(x) { console.log( "From bitvector vGoods: " + x ); } );
@@ -61,13 +61,32 @@ var checkMerged = vMergedVector.map( function(x) { console.log( "From bitvector 
 ```
 
 ## API
-### append( bit_id )
+### push( bit_id )
 
 Appends bit_id to the bitmap. Sorry, no random access today, but is developed hard...
 
 ### map( ... )
 
 This thing is the same as in plain vanilla Array
+
+### rawor( vectorRight ) 
+
+Applies logical OR operation on This and vectorRight vectors. Result is new vector or undef if things were wrong.
+Does not account for sparsity ( see. sparseor for that ), thus it could be slower, when applied to sparse vectors
+
+### rawand( vectorRight ) 
+
+Applies logical AND operation on This and vectorRight vectors. Result is new vector or undef if things were wrong
+
+
+### population( ) 
+
+Returns the number of nonzero bits ( population count ). Such a long name is to avoid confusion with pop ( which is Array-specific method ) 
+
+### length( )
+
+Returns compressed size ( IN BITS! ). 
+
 
 ## Testing
 

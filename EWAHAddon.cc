@@ -8,9 +8,11 @@
 using namespace v8;
 using namespace node;
 
-/// Traditional module init function
-void InitAll( Handle< Object> target) {
-  BitVector::Init(target);
+/// Factory method to allow creating BitVectors in its methods
+Handle<Value> CreateObject( const Arguments& args ) 
+{
+  HandleScope scope;
+  return scope.Close( BitVector::NewInstance(args) );
 }
 
 extern "C" void
@@ -19,6 +21,10 @@ init(Handle<Object> target)
     HandleScope scope;
 
     BitVector::Init(target);
+
+    // Install object creator
+    target->Set(String::NewSymbol("createObject"),
+   	   FunctionTemplate::New(CreateObject)->GetFunction());
 }
 
 

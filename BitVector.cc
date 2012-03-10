@@ -5,6 +5,20 @@
 
 using namespace v8;
 
+// Define static constructor 
+Persistent<Function> BitVector::constructor;
+
+Handle<Value> BitVector::NewInstance(const Arguments& args)
+{
+  HandleScope scope;
+
+  const unsigned argc = 1;
+  Handle<Value> argv[argc] = { args[0] };
+  Local<Object> instance = constructor->NewInstance(argc, argv);
+
+  return scope.Close(instance);
+}
+
 /// Javascript new end up here, where we create BitVector instance
 Handle<Value> BitVector::New( const Arguments& args )
 {
@@ -17,7 +31,7 @@ Handle<Value> BitVector::New( const Arguments& args )
 }
 
 /// Appends new bit to the end of an array ( extending it if necessary )
-Handle<Value> BitVector::append( const v8::Arguments& args )
+Handle<Value> BitVector::push( const v8::Arguments& args )
 {
 	HandleScope scope;
 
@@ -69,8 +83,7 @@ Handle<Value> BitVector::map( const v8::Arguments& args )
 	// Obtain a function to bother
 	Local< Function >  cb = Local<Function>::Cast( args[0] );
 	const unsigned  argc  = 1;
-
-	unsigned        iArrayCell   = 0;
+	unsigned        iArrayCell           = 0;
 
 	const  ewah_vector_t&   vBitArray    =  that->getImmutableArray();
 	for ( ewah_const_iterator it    =  vBitArray.begin(); it != vBitArray.end(); ++it )
@@ -85,6 +98,150 @@ Handle<Value> BitVector::map( const v8::Arguments& args )
 	return scope.Close( vResultArray );
 }
 
+
+/// Gets back total size of a bitmap in bits
+v8::Handle<v8::Value> BitVector::length(const v8::Arguments& args )
+{
+	HandleScope scope;
+
+	// Unwrap This to get the object to process
+	BitVector* that      = ObjectWrap::Unwrap< BitVector >(args.This());
+	const ewah_vector_t&   vBitArray    =  that->getImmutableArray();
+
+	return scope.Close( Number::New( vBitArray.sizeInBits( ) ) );
+}
+
+v8::Handle<v8::Value> BitVector::join(const v8::Arguments& args )
+{
+}
+
+v8::Handle<v8::Value> BitVector::toString(const v8::Arguments& args )
+{
+}
+
+v8::Handle<v8::Value> BitVector::concat(const v8::Arguments& args )
+{
+}
+
+v8::Handle<v8::Value> BitVector::forEach(const v8::Arguments& args )
+{
+}
+
+v8::Handle<v8::Value> BitVector::sparseand(const v8::Arguments& args )
+{
+}
+
+v8::Handle<v8::Value> BitVector::rawand(const v8::Arguments& args )
+{
+	HandleScope scope;
+
+        // Check, that arguments are appropriate
+        if ( args.Length() < 1 )
+        {
+                ThrowException(Exception::TypeError(String::New("Wrong number of arguments ( must be at maximum one )")));
+                return scope.Close(Undefined());
+        }
+
+        if ( !args[0]->IsObject() )
+        {
+                ThrowException(Exception::TypeError(String::New("Wrong type of arguments (only accepts bitVectors)")));
+                return scope.Close(Undefined());
+        }
+
+	// Here we had unwrapped the second operand ( first is This )
+	BitVector* rightOp   = ObjectWrap::Unwrap< BitVector >(args[0]->ToObject());
+
+	if ( rightOp == NULL )
+	{
+		ThrowException(Exception::TypeError(String::New("Cannot cast arguments to something of type BitVector ( rightOp == NULL )")));
+		return scope.Close(Undefined());
+	}
+
+
+	// Create temporable object, that we will Close after it will be filled with the result
+	Handle<Value>   bvContainer       = BitVector::NewInstance( args );
+
+	BitVector*  objContainer          = ObjectWrap::Unwrap< BitVector >(  bvContainer->ToObject() );
+
+	// Unwrap This to get the object to process
+	BitVector* that      = ObjectWrap::Unwrap< BitVector >(args.This());
+	ewah_vector_t&   vThisBitArray    =  that->getMutableArray();
+
+	//ThrowException(Exception::TypeError( strTestRight ));
+
+	vThisBitArray.logicaland( rightOp->getMutableArray( ), objContainer->getMutableArray( ) );
+
+	return  scope.Close( bvContainer );
+}
+
+v8::Handle<v8::Value> BitVector::rawor(const v8::Arguments& args )
+{
+	HandleScope scope;
+
+        // Check, that arguments are appropriate
+        if ( args.Length() < 1 )
+        {
+                ThrowException(Exception::TypeError(String::New("Wrong number of arguments ( must be at maximum one )")));
+                return scope.Close(Undefined());
+        }
+
+        if ( !args[0]->IsObject() )
+        {
+                ThrowException(Exception::TypeError(String::New("Wrong type of arguments (only accepts bitVectors)")));
+                return scope.Close(Undefined());
+        }
+
+	// Here we had unwrapped the second operand ( first is This )
+	BitVector* rightOp   = ObjectWrap::Unwrap< BitVector >(args[0]->ToObject());
+
+	if ( rightOp == NULL )
+	{
+		ThrowException(Exception::TypeError(String::New("Cannot cast arguments to something of type BitVector ( rightOp == NULL )")));
+		return scope.Close(Undefined());
+	}
+
+
+	// Create temporable object, that we will Close after it will be filled with the result
+	Handle<Value>   bvContainer       = BitVector::NewInstance( args );
+
+	BitVector*  objContainer          = ObjectWrap::Unwrap< BitVector >(  bvContainer->ToObject() );
+
+	// Unwrap This to get the object to process
+	BitVector* that      = ObjectWrap::Unwrap< BitVector >(args.This());
+	ewah_vector_t&   vThisBitArray    =  that->getMutableArray();
+
+        // Compose dump of right and this values as strings 
+	Handle< String > strBreak     = String::New(" , ");
+	Handle< String > strTestRight = String::New("rightOP dump: ");
+
+	Handle< String > strTestThis = String::New("vThisBit dump: ");
+
+ 	for ( ewah_const_iterator it    =  rightOp->getMutableArray().begin(); it != rightOp->getMutableArray().end(); ++it )
+        {
+		strTestRight->Concat( strTestRight, (Number::New( *it ))->ToString());
+		strTestRight->Concat( strTestRight, strBreak ); 
+	}	
+
+	//ThrowException(Exception::TypeError( strTestRight ));
+
+	vThisBitArray.logicalor( rightOp->getMutableArray( ), objContainer->getMutableArray( ) );
+
+	return  scope.Close( bvContainer );
+}
+
+// Gets back the number of nonzero bits...
+Handle<Value> BitVector::population( const v8::Arguments& args )
+{
+	HandleScope scope;
+
+	// Unwrap This to get the object to process
+	BitVector* that      = ObjectWrap::Unwrap< BitVector >(args.This());
+	ewah_vector_t&   vBitArray    =  that->getMutableArray();
+
+	return scope.Close( Number::New( vBitArray.numberOfOnes( ) ) );
+}
+
+// Do we really need to implement this?
 Handle<Value> BitVector::get( const v8::Arguments& args )
 {
    HandleScope scope;
