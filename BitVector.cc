@@ -42,6 +42,49 @@ Handle<Value> BitVector::append( const v8::Arguments& args )
         return scope.Close( Undefined());
 }
 
+/// Mimic Array.map ( and should provide identical behavior )
+Handle<Value> BitVector::map( const v8::Arguments& args )
+{
+	HandleScope   scope;
+
+	// Check, that arguments are appropriate
+	if ( args.Length() < 1 )
+	{
+		ThrowException(Exception::TypeError(String::New("Wrong number of arguments ( maximum one function must be specified )")));
+		return scope.Close(Undefined());
+	}
+
+	if ( !args[0]->IsFunction() )
+	{
+		ThrowException(Exception::TypeError(String::New("Wrong type of arguments (only accepts functions)")));
+		return scope.Close(Undefined());
+	}
+
+	// Unwrap This to get the object to process
+	BitVector* that      = ObjectWrap::Unwrap< BitVector >(args.This());
+
+	// Here we store things, returned from given function
+        Handle< Array >      vResultArray = Array::New( );
+
+	// Obtain a function to bother
+	Local< Function >  cb = Local<Function>::Cast( args[0] );
+	const unsigned  argc  = 1;
+
+	unsigned        iArrayCell   = 0;
+
+	const  ewah_vector_t&   vBitArray    =  that->getImmutableArray();
+	for ( ewah_const_iterator it    =  vBitArray.begin(); it != vBitArray.end(); ++it )
+	{
+		Local<Value> argv[argc] = { Local<Value>::New( Number::New( *it )) };
+		Local<Value> result = cb->Call( Context::GetCurrent()->Global(), argc, argv );
+		
+		vResultArray->Set( iArrayCell++, result );
+	}
+
+	// Return filled Array, as we expected to do
+	return scope.Close( vResultArray );
+}
+
 Handle<Value> BitVector::get( const v8::Arguments& args )
 {
    HandleScope scope;

@@ -4,57 +4,76 @@ Simple, fast bitmap vectors ( sparse and dense ) and indices implementation, bas
 
 Features:
 
-* Allows Javascript code to generate and manipulate EWAH encoded bitvectors of arbitrary length, thus performing fast and space efficient computations
+* Allows Javascript code to generate and manipulate EWAH encoded bitvectors of arbitrary length
+* Word-aligned compression scheme facilitates fast encoding/decoding while retaining pretty small memory footprint
 * Really speedy, thanks to the C++ background, that was wrapped to be usable in JS using some dark V8 magic :-)
+* Mostly drop-in syntactic replacement for Array ( where possible and makes sense )
 * Support (de)serialization of encoded bitmaps
-* Should have been working in all browsers as well as under node.js, however, this should be tested with more care
-* [Annotated source code](http://broofa.github.com/node-uuid/docs/uuid.html)
+* Well-commented and clean code
 
 ## Getting Started
 
-Install it in node.js:
+Install it in node.js ( npm support is upcoming ):
 
 ```
-npm install node-ewah
+Clone repository:
+git clone git@github.com:olddaos/node-ewah.git
+
+Assemble using WAF:
+node-waf configure build
+
+All done...
 ```
 
 ```javascript
-var Bitvector = require('node-ewah');
+var BitVector = require('node-ewah');
 ```
 
 Then create some vectors ...
 
 ```javascript
 
-var vGoods    = new Bitvector();
-var vSpecies  = new Bitvector();
+var vGoods    = new BitVector();
+var vSpecies  = new BitVector();
 
 // This is the bitvector of docids, that contain the word "goods". Bit number #xxx is on, if and only if document number #xxx contains word "goods".
-vGoods.set(10);
-vGoods.set(1234);
-vGoods.set(101234);
+vGoods.append(10);
+vGoods.append(1234);
+vGoods.append(101234);
 
 // This is the bitvector of docids, that contain the word "species". Bit is the for the same reason.
-vSpecies.set(1234);
-vSpecies.set(1239);
-vSpecies.set(10000);
+vSpecies.append(1234);
+vSpecies.append(1239);
+vSpecies.append(10000);
 
 // Now lets know, what documents contains both terms at the same time
 // This operation is performed using native machine words, that contain bitmap fragments, and so is extremely fast
+// In addition, sparse_and c
+vMergedVector = vGoods.sparse_and( vSpecies );
 
-vMergedVector = vGoods.and( vSpecies );
+// Check, that things are retrieved fine...
+var checkVector = vGoods.map( function(x) { console.log( "From bitvector vGoods: " + x ); } );
+
+// Check merging result...
+var checkMerged = vMergedVector.map( function(x) { console.log( "From bitvector vMerged: " + x ); } );
+
 
 ```
 
 ## API
+### append( bit_id )
 
+Appends bit_id to the bitmap. Sorry, no random access today, but is developed hard...
+
+### map( ... )
+
+This thing is the same as in plain vanilla Array
 
 ## Testing
 
 In node.js
 
 ```
-> cd test
 > node ewah.js
 ```
 
