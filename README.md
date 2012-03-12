@@ -13,17 +13,14 @@ Features:
 
 ## Getting Started
 
-Install it in node.js ( npm support is upcoming ):
+Install it in node.js : 
 
 ```
-Clone repository:
-git clone git@github.com:olddaos/node-ewah.git
+npm install node-ewah
 
-Assemble using WAF:
-node-waf configure build
-
-All done...
 ```
+
+Then, start to play with:
 
 ```javascript
 var BitVector = require('node-ewah');
