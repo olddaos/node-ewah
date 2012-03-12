@@ -5,7 +5,7 @@
   "keywords"      : ["ewah", "bitvectors", "lemur"],
   "author"        : "Alexey Kosenkov <olddaos@gmail.com>",
   "lib"           : ".",
-  "main"          : "./ewah.js",
+  "main"          : "./index.js",
   "repository"    : { "type" : "git", "url" : "https://github.com/olddaos/node-ewah.git" },
-  "version"       : "1.0.0"
+  "version"       : "1.0.6"
 }
