@@ -63,11 +63,19 @@ var checkMerged = vMergedVector.map( function(x) { console.log( "From bitvector 
 ## API
 ### push( bit_id )
 
-Appends bit_id to the bitmap. Sorry, no random access today, but is developed hard...
+Appends bit_id to the bitmap. Sorry, no random access today, but development still going hard...
 
 ### map( ... )
 
 This thing is the same as in plain vanilla Array
+
+### join( delimiter )
+
+Returns catenated values of nonzero bits, interspersed with specified delimiter. Catenation is performed using C++ methods, i.e. new strings are not spawned
+
+### toString( delimiter )
+
+Same as above, but no delimiter is allowed :-) Pretty standard behavior...
 
 ### rawor( vectorRight ) 
 

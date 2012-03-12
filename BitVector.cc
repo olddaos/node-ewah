@@ -3,6 +3,8 @@
 #include <node.h>
 #include "BitVector.h"
 
+#include <sstream>
+
 using namespace v8;
 
 // Define static constructor 
@@ -111,12 +113,53 @@ v8::Handle<v8::Value> BitVector::length(const v8::Arguments& args )
 	return scope.Close( Number::New( vBitArray.sizeInBits( ) ) );
 }
 
+// Joins nonzero elements with or without delimiter
 v8::Handle<v8::Value> BitVector::join(const v8::Arguments& args )
 {
+	HandleScope   scope;
+
+	// Default delimiter ( if none is specified )
+	Handle< String >   strDelimiter  = String::New(",");
+
+	// Check, that arguments are appropriate and consistent
+	if (( args.Length() >= 1 ) && ( args[0]->IsString()) && ((args[0]->ToString())->Length( ) > 0 ))
+	{
+		strDelimiter = args[0]->ToString();
+	}
+
+	// That's slow, but many times faster, that Javascript Concat...
+	std::stringstream  streamResult ;
+
+	const unsigned    iLength  = strDelimiter->Utf8Length( );
+	char   *pDelimiter   = new char[ iLength ];	// That was made, because original Array delimiter was not bounded by length. 
+	memset( pDelimiter, 0, iLength );
+
+	// FIXME: Delimeter can be any correct UTF8 symbol, but this method will be a bug in this case!...
+	strDelimiter->WriteAscii( pDelimiter );
+
+	// Unwrap This to get the object to process
+	BitVector* that      = ObjectWrap::Unwrap< BitVector >(args.This());
+
+	const ewah_vector_t&   vBitArray = that->getImmutableArray();	
+
+	ewah_const_iterator       it    = vBitArray.begin( );
+        streamResult              <<  *it; ++it;
+        for ( ;  ( it != vBitArray.end()) && (  streamResult << pDelimiter ); ++it )
+	{
+		streamResult     <<  *it;
+	}
+
+	Handle< String >   strResult     = String::New( streamResult.str( ).c_str( ));
+
+	delete  pDelimiter;
+	return scope.Close( strResult );
 }
 
 v8::Handle<v8::Value> BitVector::toString(const v8::Arguments& args )
 {
+	HandleScope  scope;
+
+	return   join( args );
 }
 
 v8::Handle<v8::Value> BitVector::concat(const v8::Arguments& args )

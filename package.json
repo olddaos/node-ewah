@@ -1,6 +1,6 @@
 {
   "name"          : "node-ewah",
-  "description"   : "Fast and concise bitvectors, based on Lemur Project."
+  "description"   : "Fast and concise bitvectors, based on Lemur Project.",
   "url"           : "http://github.com/olddaos/node-ewah",
   "keywords"      : ["ewah", "bitvectors", "lemur"],
   "author"        : "Alexey Kosenkov <olddaos@gmail.com>",

@@ -2,6 +2,7 @@ import Options
 from os import unlink, symlink, popen
 from os.path import exists 
 
+APPNAME = 'node-ewah'
 srcdir = "."
 blddir = "build"
 VERSION = "0.0.1"
